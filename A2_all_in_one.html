@@ -1,0 +1,660 @@
+<!-- DT340A - Web Technologies - Assignment 2 - Carl McCann - C12508463 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <title>DT340A - Web Technologies - Assignment 2 - Carl McCann - C12508463</title>
+
+    <link rel="stylesheet" href="A2.css">
+
+    <script type="text/javascript">
+
+        // DT340A - Web Technologies - Assignment 2 - Carl McCann - C12508463
+
+        var globalCurrentUser;
+
+        function showHidePassword(){
+            var passwordInput = document.getElementById('passwordInput');
+            if(passwordInput.getAttribute('type') == 'password') passwordInput.setAttribute('type','text');
+            else passwordInput.setAttribute('type','password');
+        }
+
+        // DT340A - Web Technologies - Assignment 2 - Carl McCann - C12508463
+        function forgetUser(){
+            // TODO
+            var uniqueCookieName = "WebTechA2" + globalCurrentUser.username;
+            deleteCookie(uniqueCookieName);
+            if(cookieExists(uniqueCookieName)) alert("Gone, but not forgotten (Page will be reloaded)");
+            else alert("Forgotten, but not gone (Page will be reloaded)");
+            window.location.reload();
+        }
+
+        // DT340A - Web Technologies - Assignment 2 - Carl McCann - C12508463
+        /**
+         * Created by carlmccann2 on 06/04/2017.
+         */
+
+
+        function login() {
+            if(loginValidation()){
+                loginCompareUsers();
+            }
+        }
+
+        function loginCompareUsers() {
+            // get data from form
+            var username = document.getElementById('usernameInput').value;
+            var password = document.getElementById('passwordInput').value;
+
+            var uniqueCookieName = 'WebTechA2' + username;
+            if(cookieExists(uniqueCookieName)){
+                var jsonUser = Cookies.getJSON(uniqueCookieName);
+                if( jsonUser.username == username){      // username exists
+                    if(jsonUser.password == password){   // password matches
+                        alert(('Welcome Back, ' + username + '!'));
+                        globalCurrentUser = jsonUser;    // set global current user
+                        successfulLogin(jsonUser);
+                    }
+                    else{                                   // password doesn't match
+                        alert('Incorrect Password!');
+                    }
+                }
+            }
+            else{
+                alert("Username not Found!");
+            }
+        }
+
+        function successfulLogin(currentUser){
+            // disable login button
+            document.getElementById('loginInput').disabled = true;
+
+            // add update button
+            var update = document.createElement('input');
+            update.type = 'button';
+            update.id = 'updateInput';
+            update.value = 'Update';
+            update.onclick = function(){updateCookie()};
+            document.getElementById('loginRegisterForm').removeChild(document.getElementById('registerInput'));
+            document.getElementById('loginRegisterForm').appendChild(update);
+
+            // get details from currently logged on user
+            document.getElementById('emailInput').value = currentUser.email;
+            document.getElementById('dateOfBirthInput').value = currentUser.dob;
+
+            // update login count
+            currentUser.views += 1;
+            document.getElementById('hitCounter').innerHTML = String(currentUser.views);
+
+            //// update cookie
+
+            var cookieName = 'WebTechA2' + currentUser.username;
+
+            // create with same name, updated views in jsonUser and the same expiry it was created with
+            var expiry = new Date(currentUser.cookieExpiry);
+            createCookie(cookieName, currentUser, expiry);
+
+            //// End of update cookie
+
+            // add forget me button
+            var forgetMe = document.createElement('input');
+            forgetMe.type = 'button';
+            forgetMe.id = 'forgetMeInput';
+            forgetMe.value = 'Forget Me';
+            forgetMe.onclick = function(){forgetUser()};
+            document.body.appendChild(forgetMe);
+        }
+
+        // DT340A - Web Technologies - Assignment 2 - Carl McCann - C12508463
+        /**
+         * Created by carlmccann2 on 06/04/2017.
+         */
+
+        function createCookie(name, data, expiry){
+            Cookies.set(name, data, {expires: expiry});
+        }
+        function deleteCookie(name){
+            Cookies.remove(name);
+        }
+        function cookieExists(name){
+            if(Cookies.get(name) == undefined) return false;
+            else return true;
+        }
+
+        // DT340A - Web Technologies - Assignment 2 - Carl McCann - C12508463
+
+        function register() {
+            if(formValidation()){
+                registerNewUser();
+            }
+        }
+
+        function registerNewUser() {
+            // pull info from form
+            var username = document.getElementById('usernameInput').value;
+            var password = document.getElementById('passwordInput').value;
+            var email = document.getElementById('emailInput').value;
+            var dob = document.getElementById('dateOfBirthInput').value;
+            var views = 0;  // set counter to 0
+
+            var myUser = new User(username,password,email,dob,views,new Date());   // create a user object
+            var uniqueCookieName = "WebTechA2" + username;
+
+            if(!cookieExists(uniqueCookieName)){
+                myUser.cookieExpiry.setFullYear(myUser.cookieExpiry.getFullYear() + 1);
+                createCookie(uniqueCookieName, myUser, myUser.cookieExpiry);
+                alert(username + ', You have been registered!');
+            }
+            else{
+                alert('User already exists!');
+            }
+        }
+
+        // DT340A - Web Technologies - Assignment 2 - Carl McCann - C12508463
+        /**
+         * Created by carlmccann2 on 06/04/2017.
+         */
+
+        function updateCookie(){
+            if(updateValidation()){
+                var uniqueCookieName = "WebTechA2" + globalCurrentUser.username;
+                var json;
+                if(cookieExists(uniqueCookieName)){
+                    json = Cookies.getJSON(uniqueCookieName);
+                    json.password = document.getElementById('passwordInput').value;
+                    json.email = document.getElementById('emailInput').value;
+                    json.dob = document.getElementById('dateOfBirthInput').value;
+                    createCookie(uniqueCookieName, json, new Date(json.cookieExpiry));
+                    alert("Successfully Updated!");
+                }
+                else{
+                    alert("Update Unsuccessful!");
+                }
+            }
+            else{
+                alert("Update Unsuccessful!");
+            }
+        }
+
+        // DT340A - Web Technologies - Assignment 2 - Carl McCann - C12508463
+        /**
+         * Created by carlmccann2 on 06/04/2017.
+         */
+
+        function User(username,password,email,dob,views, cookieExpiry) {
+            this.username = username;
+            this.password = password;
+            this.email = email;
+            this.dob = dob;
+            this.views = views;
+            this.cookieExpiry = cookieExpiry
+        }
+
+        // DT340A - Web Technologies - Assignment 2 - Carl McCann - C12508463
+
+
+        function usernameValidation(realTime){      // realTime is a boolean that allows this function to apply style changes
+            var username = document.getElementById('usernameInput').value;
+            var list = document.getElementById('usernameList');
+
+            while(list.hasChildNodes()) list.removeChild(list.lastChild);
+
+            if(username.match(/\s/) || username.length == 0){
+                if(realTime){
+                    var spaceConstraint = document.createElement('li');
+                    spaceConstraint.appendChild(document.createTextNode('Must have length > 0 and not contain any space'));
+                    list.appendChild(spaceConstraint);
+                }
+                return false;
+            }
+            return true;
+        }
+
+        function passwordValidation(realTime){      // realTime is a boolean that allows this function to apply style changes
+            var valid = true;
+            var password = document.getElementById('passwordInput').value;
+            var list = document.getElementById('passwordList');
+
+            while(list.hasChildNodes()) list.removeChild(list.lastChild);
+
+            // written on rubular.com
+            if(!password.match(/\d+/)){      // must contain a digit
+                if(realTime){
+                    var digitConstraint = document.createElement('li');
+                    digitConstraint.appendChild(document.createTextNode('Must Contain at least 1 digit.'));
+                    list.appendChild(digitConstraint);
+                }
+                valid = false;
+            }
+            if(!password.match(/[A-Z]+/)){   // must contain a uppercase letter
+                if(realTime){
+                    var uppercaseConstraint = document.createElement('li');
+                    uppercaseConstraint.appendChild(document.createTextNode('Must Contain at least 1 uppercase letter.'));
+                    list.appendChild(uppercaseConstraint);
+                }
+                valid = false;
+            }
+
+            if(!password.match(/\W+/)){
+                if(realTime){
+                    var specialCharacterConstraint = document.createElement('li');
+                    specialCharacterConstraint.appendChild((document.createTextNode('Must contain a special character such as ! or ?')))
+                    list.appendChild(specialCharacterConstraint);
+                }
+                valid = false;
+            }
+
+            if(!password.match(/.{8,}/)){   // must be at least 8 characters long
+                if(realTime){
+                    var lengthConstraint = document.createElement('li');
+                    lengthConstraint.appendChild(document.createTextNode('Must be at least 8 characters long.'));
+                    list.appendChild(lengthConstraint);
+                }
+                valid = false;
+            }
+
+
+            return valid;
+
+        }
+
+        function emailValidation(realTime){ // realTime is a boolean that allows this function to apply style changes
+            var email = document.getElementById('emailInput').value;
+            // written on rubular.com with these five cases: 'carlmccann2@gmail.com', 'asf',
+            // '@gmail.com', 'sadfsadf@.com', 'carl@gmal'
+
+
+            if(email.match(/^((\w)+\.(\w)+|(\w)+)@(\w)+\.(\w)+$/)){  //matches one period mid local part of email
+                // if(email.match(/^((\w)+\.*(\w)+)@(\w)+\.(\w)+$/)){    // matches multiple simultaneous periods mid local part of email
+
+                if(realTime) document.getElementById('emailInput').style.color = 'black';
+                return true;
+            }
+
+            if(realTime) document.getElementById('emailInput').style.color = 'red';
+            return false;
+        }
+
+        function dateOfBirthValidation(realTime){ // realTime is a boolean that allows this function to apply style changes
+            var dob = document.getElementById('dateOfBirthInput').value;
+            var split = dob.split('/');
+
+            var day, month, year;
+            if(split.length == 3) {
+                day = parseInt(split[0]);
+                month = parseInt(split[1]);
+                year = parseInt(split[2]);
+
+                if(isNaN(day) || isNaN(month) || isNaN(year)){  // basic check for numbers
+                    if (realTime) document.getElementById('dateOfBirthInput').style.color = 'red';
+                    return false;
+                }
+
+                var date = new Date();
+
+                // future proofing
+                if (year >= date.getFullYear()) {               // the future can be in the this year
+                    if( year > date.getFullYear()){
+                        return false;
+                    }
+                    if (month >= (date.getMonth() + 1)) {       // the future can be in the this month
+                        if(month > (date.getMonth() + 1)){
+                            return false;
+                        }
+                        if (day > date.getDate()) {             // but the future can't be today
+                            if (realTime) document.getElementById('dateOfBirthInput').style.color = 'red';
+                            return false;
+                        }
+                    }
+                }
+
+                // check for impossible months
+                if(month > 12 || month < 1){
+                    if (realTime) document.getElementById('dateOfBirthInput').style.color = 'red';
+                    return false;
+                }
+                // days and months validation
+                if(month == 1 || month == 3 || month == 5 || month == 7 || month == 8 || month == 10 || month == 12){
+                    if(day < 1 || day > 31){
+                        if (realTime) document.getElementById('dateOfBirthInput').style.color = 'red';
+                        return false;
+                    }
+
+                }
+
+                if(month == 4 || month == 6 || month == 9 || month == 11){
+                    if(day < 1 || day > 30){
+                        if (realTime) document.getElementById('dateOfBirthInput').style.color = 'red';
+                        return false;
+                    }
+                }
+
+                if(month == 2 ){
+                    if(year % 4 == 0){
+                        if(day < 1 || day > 29){
+                            if (realTime) document.getElementById('dateOfBirthInput').style.color = 'red';
+                            return false;
+                        }     // leap year
+                    }
+                    else{
+                        if(day < 1 || day > 28){
+                            if (realTime) document.getElementById('dateOfBirthInput').style.color = 'red';
+                            return false;
+                        }
+                    }
+                }
+                if (realTime) document.getElementById('dateOfBirthInput').style.color = 'black';
+                return true;
+            }
+            if (realTime) document.getElementById('dateOfBirthInput').style.color = 'red';
+            return false;
+        }
+
+        // facade for the validators
+        function formValidation(){
+            var errorString = "";
+
+            var u = usernameValidation();
+            var p = passwordValidation();
+            var e = emailValidation();
+            var d = dateOfBirthValidation();
+
+            if(!u) errorString += 'username validation: ' + u + "\n";
+            if(!p) errorString += "password validation: " + p + "\n";
+            if(!e) errorString += "email validation: " + e + "\n";
+            if(!d) errorString += "dob validation: " + d + "\n";
+
+
+            if(errorString != "") alert(errorString);
+            return u && p && e && d;
+        }
+
+        function loginValidation(){
+            var errorString = "";
+
+            var u = usernameValidation();
+            var p = passwordValidation();
+
+            if(!u) errorString += 'username validation: ' + u + "\n";
+            if(!p) errorString += "password validation: " + p + "\n";
+
+            if(errorString != "") alert(errorString);
+            return u && p;
+        }
+
+        function updateValidation(){
+            var errorString = "";
+
+            var p = passwordValidation();
+            var e = emailValidation();
+            var d = dateOfBirthValidation();
+
+            if(!p) errorString += "password validation: " + p + "\n";
+            if(!e) errorString += "email validation: " + e + "\n";
+            if(!d) errorString += "dob validation: " + d + "\n";
+
+
+            if(errorString != "") alert(errorString);
+            return p && e && d;
+
+        }
+
+        /*!
+         * JavaScript Cookie v2.1.4
+         * https://github.com/js-cookie/js-cookie
+         *
+         * Copyright 2006, 2015 Klaus Hartl & Fagner Brack
+         * Released under the MIT license
+         */
+        ;(function (factory) {
+            var registeredInModuleLoader = false;
+            if (typeof define === 'function' && define.amd) {
+                define(factory);
+                registeredInModuleLoader = true;
+            }
+            if (typeof exports === 'object') {
+                module.exports = factory();
+                registeredInModuleLoader = true;
+            }
+            if (!registeredInModuleLoader) {
+                var OldCookies = window.Cookies;
+                var api = window.Cookies = factory();
+                api.noConflict = function () {
+                    window.Cookies = OldCookies;
+                    return api;
+                };
+            }
+        }(function () {
+            function extend () {
+                var i = 0;
+                var result = {};
+                for (; i < arguments.length; i++) {
+                    var attributes = arguments[ i ];
+                    for (var key in attributes) {
+                        result[key] = attributes[key];
+                    }
+                }
+                return result;
+            }
+
+            function init (converter) {
+                function api (key, value, attributes) {
+                    var result;
+                    if (typeof document === 'undefined') {
+                        return;
+                    }
+
+                    // Write
+
+                    if (arguments.length > 1) {
+                        attributes = extend({
+                            path: '/'
+                        }, api.defaults, attributes);
+
+                        if (typeof attributes.expires === 'number') {
+                            var expires = new Date();
+                            expires.setMilliseconds(expires.getMilliseconds() + attributes.expires * 864e+5);
+                            attributes.expires = expires;
+                        }
+
+                        // We're using "expires" because "max-age" is not supported by IE
+                        attributes.expires = attributes.expires ? attributes.expires.toUTCString() : '';
+
+                        try {
+                            result = JSON.stringify(value);
+                            if (/^[\{\[]/.test(result)) {
+                                value = result;
+                            }
+                        } catch (e) {}
+
+
+                        if (!converter.write) {
+                            value = encodeURIComponent(String(value))
+                                .replace(/%(23|24|26|2B|3A|3C|3E|3D|2F|3F|40|5B|5D|5E|60|7B|7D|7C)/g, decodeURIComponent);
+                        } else {
+                            value = converter.write(value, key);
+                        }
+
+                        key = encodeURIComponent(String(key));
+                        key = key.replace(/%(23|24|26|2B|5E|60|7C)/g, decodeURIComponent);
+                        key = key.replace(/[\(\)]/g, escape);
+
+                        var stringifiedAttributes = '';
+
+                        for (var attributeName in attributes) {
+                            if (!attributes[attributeName]) {
+                                continue;
+                            }
+                            stringifiedAttributes += '; ' + attributeName;
+                            if (attributes[attributeName] === true) {
+                                continue;
+                            }
+                            stringifiedAttributes += '=' + attributes[attributeName];
+                        }
+                        return (document.cookie = key + '=' + value + stringifiedAttributes);
+                    }
+
+                    // Read
+
+                    if (!key) {
+                        result = {};
+                    }
+
+                    // To prevent the for loop in the first place assign an empty array
+                    // in case there are no cookies at all. Also prevents odd result when
+                    // calling "get()"
+                    var cookies = document.cookie ? document.cookie.split('; ') : [];
+                    var rdecode = /(%[0-9A-Z]{2})+/g;
+                    var i = 0;
+
+                    for (; i < cookies.length; i++) {
+                        var parts = cookies[i].split('=');
+                        var cookie = parts.slice(1).join('=');
+
+                        if (cookie.charAt(0) === '"') {
+                            cookie = cookie.slice(1, -1);
+                        }
+
+                        try {
+                            var name = parts[0].replace(rdecode, decodeURIComponent);
+                            cookie = converter.read ?
+                                converter.read(cookie, name) : converter(cookie, name) ||
+                                cookie.replace(rdecode, decodeURIComponent);
+
+                            if (this.json) {
+                                try {
+                                    cookie = JSON.parse(cookie);
+                                } catch (e) {}
+                            }
+
+                            if (key === name) {
+                                result = cookie;
+                                break;
+                            }
+
+                            if (!key) {
+                                result[name] = cookie;
+                            }
+                        } catch (e) {}
+                    }
+
+                    return result;
+                }
+
+                api.set = api;
+                api.get = function (key) {
+                    return api.call(api, key);
+                };
+                api.getJSON = function () {
+                    return api.apply({
+                        json: true
+                    }, [].slice.call(arguments));
+                };
+                api.defaults = {};
+
+                api.remove = function (key, attributes) {
+                    api(key, '', extend(attributes, {
+                        expires: -1
+                    }));
+                };
+
+                api.withConverter = init;
+
+                return api;
+            }
+
+            return init(function () {});
+        }));
+
+        // end of JavaScript Cookie v2.1.4
+    </script>
+
+    <style>
+        /*  DT340A - Web Technologies - Assignment 2 - Carl McCann - C12508463  */
+
+        /* https://www.w3schools.com/css/css_form.asp */
+
+        html * {
+            font-family: "Trebuchet MS", Helvetica, sans-serif;
+        }
+
+        input {
+            width: 40%;
+            padding: 10px 20px;
+            box-sizing: border-box;
+        }
+
+        input[type="password"]{
+            font:small-caption;
+            font-size:16px;
+        }
+
+        input[type='text']{
+            font-size: 18px;
+        }
+        input[type='date']{
+            font-size: 18px;
+        }
+
+        input[type='button']{
+            width: 20%; /* half of inputs width. This will override it*/
+            background-color: aquamarine;
+            font-size: 16px;
+        }
+
+        input[type='button']:hover{
+            background-color: aqua;
+        }
+
+        #hitCounterDiv{
+            width:40%;
+            background-color: black;
+            color: yellow;
+            text-align: center;
+            font-size: 30px;
+        }
+
+        #forgetMeInput,#showHIdePasswordButton{
+            width: 40%;
+        }
+    </style>
+
+
+</head>
+<body>
+
+<div id="loginSignupFormContainer">
+    <form id="loginRegisterForm">
+        <h3>username</h3>
+        <input type="text" id="usernameInput" value="" onkeyup="usernameValidation(true)">
+        <ul id="usernameList">
+
+        </ul>
+        <h3>password</h3>
+        <input type="password" id="passwordInput" onkeyup="passwordValidation(true)">
+        <br>
+        <br>
+        <input type="button" value="Show / Hide" id="showHIdePasswordButton" onclick="showHidePassword()">
+        <ul id="passwordList">
+
+        </ul>
+        <h3>email</h3>
+        <input type="text" id="emailInput" onkeyup="emailValidation(true)">
+        <h3>Date of Birth</h3>
+        <input type="text" id="dateOfBirthInput" placeholder="dd/mm/yyyy" onkeyup="dateOfBirthValidation(true)">
+        <br>
+        <br>
+        <input type="button" id="loginInput" value="Login" onclick="login()">
+        <input type="button" id="registerInput" value="Register" onclick="register()">
+    </form>
+</div>
+
+<div id="hitCounterDiv">
+    <p id="hitCounter">
+
+    </p>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,51 @@
+/*  DT340A - Web Technologies - Assignment 2 - Carl McCann - C12508463  */
+
+/* https://www.w3schools.com/css/css_form.asp */
+
+html * {
+    font-family: "Trebuchet MS", Helvetica, sans-serif;
+}
+
+input {
+    width: 40%;
+    padding: 10px 20px;
+    box-sizing: border-box;
+}
+
+input[type="password"]{
+    font:small-caption;
+    font-size:16px;
+}
+
+input[type='text']{
+    font-size: 18px;
+}
+input[type='date']{
+    font-size: 18px;
+}
+
+input[type='button']{
+    width: 20%; /* half of inputs width. This will override it*/
+    background-color: aquamarine;
+    font-size: 16px;
+}
+
+input[type='button']:hover{
+    background-color: aqua;
+}
+
+#hitCounterDiv{
+    width:40%;
+    background-color: black;
+    color: yellow;
+    text-align: center;
+    font-size: 30px;
+}
+
+#forgetMeInput,#showHIdePasswordButton{
+    width: 40%;
+}
+
+
+
+

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <title>DT340A - Web Technologies - Assignment 2 - Carl McCann - C12508463</title>
+
+    <link rel="stylesheet" href="A2.css">
+    <script type="text/javascript" src="A2.js"></script>
+    <script type="text/javascript" src="ForgetMe.js"></script>
+    <script type="text/javascript" src="Login.js"></script>
+    <script type="text/javascript" src="MyCookieFunctions.js"></script>
+    <script type="text/javascript" src="Register.js"></script>
+    <script type="text/javascript" src="Update.js"></script>
+    <script type="text/javascript" src="User.js"></script>
+    <script type="text/javascript" src="validation.js"></script>
+
+    <!--    Downloaded Scripts-->
+    <script type="text/javascript" src="cookie.js"></script>
+
+
+
+</head>
+<body>
+
+<div id="loginSignupFormContainer">
+    <form id="loginRegisterForm">
+        <h3>username</h3>
+        <input type="text" id="usernameInput" value="" onkeyup="usernameValidation(true)">
+        <ul id="usernameList">
+
+        </ul>
+        <h3>password</h3>
+        <input type="password" id="passwordInput" onkeyup="passwordValidation(true)">
+        <br>
+        <br>
+        <input type="button" value="Show / Hide" id="showHIdePasswordButton" onclick="showHidePassword()">
+        <ul id="passwordList">
+
+        </ul>
+        <h3>email</h3>
+        <input type="text" id="emailInput" onkeyup="emailValidation(true)">
+        <h3>Date of Birth</h3>
+        <input type="text" id="dateOfBirthInput" placeholder="dd/mm/yyyy" onkeyup="dateOfBirthValidation(true)">
+        <br>
+        <br>
+        <input type="button" id="loginInput" value="Login" onclick="login()">
+        <input type="button" id="registerInput" value="Register" onclick="register()">
+    </form>
+</div>
+
+<div id="hitCounterDiv">
+    <p id="hitCounter">
+
+    </p>
+</div>
+
+</body>
+</html>
